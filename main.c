@@ -2,10 +2,40 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define ESH_READ_LINE_BUFFERSIZE 1024
 #define ESH_TOKENS_BUFFERSIZE 64
 #define ESH_TOKEN_DELIM " \t\n\r\a"
+
+int EshLaunch(char** args) {
+  pid_t pid;
+  pid_t wpid;
+  int status = 0;
+
+  pid = fork();
+
+  if (pid == 0) {
+    // exec() under normal conditions does not return
+    if (execvp(args[0], args) == -1) {
+      perror("esh");
+    }
+    exit(EXIT_FAILURE);
+  } else if (pid < 0) {
+    perror("esh");
+  } else {
+    // Parent process
+    do {
+      // This will modify status
+      wpid = waitpid(pid, &status, WUNTRACED);
+    } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+  }
+
+  // returning 1 to calling function,
+  // ...signalling that we should prompt for input again
+  return 1;
+}
 
 char** EshParseLine(char* line) {
   int buffersize = ESH_TOKENS_BUFFERSIZE;
@@ -72,8 +102,6 @@ char* EshReadLine(void) {
         fprintf(stderr, "esh: allocation error!|n");
         exit(EXIT_FAILURE);
       }
-    }
-  }
 }
 
 // Alternative way to EshReadLine()
