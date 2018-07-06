@@ -4,6 +4,41 @@
 #include <string.h>
 
 #define ESH_READ_LINE_BUFFERSIZE 1024
+#define ESH_TOKENS_BUFFERSIZE 64
+#define ESH_TOKEN_DELIM " \t\n\r\a"
+
+char** EshParseLine(char* line) {
+  int buffersize = ESH_TOKENS_BUFFERSIZE;
+  int position = 0;
+  char** tokens = malloc(buffersize * sizeof(char*));
+  char* token;
+
+  if (!tokens) {
+    fprintf(stderr, "esh: allocation error!\n");
+    exit(EXIT_FAILURE);
+  }
+
+  token = strtok(line, ESH_TOKEN_DELIM);
+  while (token != NULL) {
+    tokens[position] = token;
+    ++position;
+
+    if (position >= buffersize) {
+      buffersize += ESH_TOKENS_BUFFERSIZE;
+      tokens = realloc(tokens, buffersize * sizeof(char*));
+
+      if (!tokens) {
+        fprintf(stderr, "esh: allocation error!\n");
+        exit(EXIT_FAILURE);
+      }
+    }
+
+    token = strtok(NULL, ESH_TOKEN_DELIM);
+  }
+
+  tokens[position] = NULL;
+  return tokens;
+}
 
 char* EshReadLine(void) {
   int buffersize = ESH_READ_LINE_BUFFERSIZE;
@@ -31,7 +66,7 @@ char* EshReadLine(void) {
 
     if (position >= buffersize) {
       buffersize += ESH_READ_LINE_BUFFERSIZE;
-      buffer = realloc(buffer, buffersize);
+      buffer = realloc(buffer, buffersize * sizeof(char));
 
       if (!buffer) {
         fprintf(stderr, "esh: allocation error!|n");
