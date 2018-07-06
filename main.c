@@ -1,5 +1,7 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define ESH_READ_LINE_BUFFERSIZE 1024
 
@@ -39,6 +41,15 @@ char* EshReadLine(void) {
   }
 }
 
+// Alternative way to EshReadLine()
+/*
+char* EshReadLine(void) {
+  char* line = NULL;
+  ssize_t buffersize = 0;
+  getline(&line, &buffersize, stdin);
+  return line;
+}
+*/
 // Read
 // Parse
 // Execute
