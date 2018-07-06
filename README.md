@@ -1,2 +1,3 @@
-# EvanjoShell
-Unix shell written by myself
+# Evanjo SHell
+Unix shell written by myself  
+esh=$  
