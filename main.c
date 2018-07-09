@@ -45,6 +45,7 @@ int EshCd(char** args) {
   return 1;
 }
 
+// get current working directory
 int EshPwd(char** args) {
   char cwd[1024];
 
