@@ -13,11 +13,12 @@
 int EshCd(char** args);
 int EshHelp(char** args);
 int EshExit(char** args);
+int EshPwd(char** args);
 
-char* builtin_str[] = {"cd", "help", "exit"};
+char* builtin_str[] = {"cd", "help", "exit", "pwd"};
 
 // function pointer array
-int (*builtin_func_ptr[])(char**) = {&EshCd, &EshHelp, &EshExit};
+int (*builtin_func_ptr[])(char**) = {&EshCd, &EshHelp, &EshExit, &EshPwd};
 
 int NumOfBuiltinFunc() { return sizeof(builtin_str) / sizeof(char*); }
 
@@ -38,6 +39,22 @@ int EshCd(char** args) {
   } else {
     if (chdir(args[1]) != 0) {
       perror("esh: error changing directory!\n");
+    }
+  }
+
+  return 1;
+}
+
+int EshPwd(char** args) {
+  char cwd[1024];
+
+  if (args[0] == NULL) {
+    fprintf(stderr, "esh: at least one command is required!\n");
+  } else {
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+      fprintf(stdout, "Current working directory is: %s.\n", cwd);
+    } else {
+      perror("esh: getcwd() error!\n");
     }
   }
 
