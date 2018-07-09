@@ -74,6 +74,20 @@ int EshLaunch(char** args) {
   return 1;
 }
 
+int EshExecute(char** args) {
+  if (args[0] == NULL) {
+    return 1;
+  }
+
+  for (int i = 0; i < NumOfBuiltinFunc(); ++i) {
+    if (strcmp(args[0]) == builtin_str[i]) {
+      return *(builtin_func_ptr[i])(args);
+    }
+  }
+
+  return EshLaunch(args);
+}
+
 char** EshParseLine(char* line) {
   int buffersize = ESH_TOKENS_BUFFERSIZE;
   int position = 0;
