@@ -34,7 +34,7 @@ int EshHelp(char** args) {
 
 int EshCd(char** args) {
   if (args[1] == NULL) {
-    fprintf(stderr, "esh: expected argument to \$cd\$.\n");
+    fprintf(stderr, "esh: expected argument to $cd$.\n");
   } else {
     if (chdir(args[1]) != 0) {
       perror("esh: error changing directory!\n");
@@ -80,8 +80,8 @@ int EshExecute(char** args) {
   }
 
   for (int i = 0; i < NumOfBuiltinFunc(); ++i) {
-    if (strcmp(args[0]) == builtin_str[i]) {
-      return *(builtin_func_ptr[i])(args);
+    if (strcmp(args[0], builtin_str[i]) == 0) {
+      return (*builtin_func_ptr[i])(args);
     }
   }
 
@@ -153,6 +153,8 @@ char* EshReadLine(void) {
         fprintf(stderr, "esh: allocation error!|n");
         exit(EXIT_FAILURE);
       }
+    }
+  }
 }
 
 // Alternative way to EshReadLine()
