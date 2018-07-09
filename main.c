@@ -4,10 +4,47 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #define ESH_READ_LINE_BUFFERSIZE 1024
 #define ESH_TOKENS_BUFFERSIZE 64
 #define ESH_TOKEN_DELIM " \t\n\r\a"
+
+int EshCd(char** args);
+int EshHelp(char** args);
+int EshExit(char** args);
+
+char* builtin_str[] = {"cd", "help", "exit"};
+
+// function pointer array
+int (*builtin_func_ptr[])(char**) = {&EshCd, &EshHelp, &EshExit};
+
+int NumOfBuiltinFunc() { return sizeof(builtin_str) / sizeof(char*); }
+
+int EshHelp(char** args) {
+  printf("Evanjo SHell.\n");
+  printf("The followings are built-in.\n");
+
+  for (int i = 0; i < NumOfBuiltinFunc(); ++i) {
+    printf("  %s\n", builtin_str[i]);
+  }
+
+  return 1;
+}
+
+int EshCd(char** args) {
+  if (args[1] == NULL) {
+    fprintf(stderr, "esh: expected argument to \$cd\$.\n");
+  } else {
+    if (chdir(args[1]) != 0) {
+      perror("esh: error changing directory!\n");
+    }
+  }
+
+  return 1;
+}
+
+int EshExit(char** args) { return 0; }
 
 int EshLaunch(char** args) {
   pid_t pid;
