@@ -1,3 +1,4 @@
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,6 +10,16 @@
 #define ESH_READ_LINE_BUFFERSIZE 1024
 #define ESH_TOKENS_BUFFERSIZE 64
 #define ESH_TOKEN_DELIM " \t\n\r\a"
+
+typedef void (*sig_handler_ptr)(int);
+
+sig_handler_ptr signal(int sig_num, sig_handler_ptr handler);
+
+void SigintHandler(int sig_num) {
+  printf("Caught SIGINT!\n");
+  // exit(1);
+  return;
+}
 
 int EshCd(char** args);
 int EshHelp(char** args);
@@ -72,6 +83,9 @@ int EshLaunch(char** args) {
   pid = fork();
 
   if (pid == 0) {
+    signal(SIGINT, SIG_DFL);  // restore SIGINT default behavior
+    // ...inside child process
+
     // exec() under normal conditions does not return
     if (execvp(args[0], args) == -1) {
       perror("esh");
@@ -191,6 +205,9 @@ void EshLoop(void) {
   char* line;
   char** args;
   int status;
+
+  // signal(SIGINT, SigintHandler);
+  signal(SIGINT, SIG_IGN);  // ignore Ctrl-C
 
   do {
     printf("esh=$ ");
