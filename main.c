@@ -116,6 +116,7 @@ int EshLaunch(char** args) {
 
 int EshExecute(char** args) {
   if (args[0] == NULL) {
+    // printf("\n");
     return 1;
   }
 
@@ -175,7 +176,11 @@ char* EshReadLine(void) {
   while (true) {
     c = getchar();
 
-    if (c == EOF || c == '\n') {
+    if (c == EOF) {
+      // buffer[position] = '\0';
+      // return buffer;
+      exit(EXIT_SUCCESS);
+    } else if (c == '\n') {
       buffer[position] = '\0';
       return buffer;
     } else {
