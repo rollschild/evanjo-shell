@@ -76,7 +76,7 @@ int EshLaunch(char** args) {
     if (execvp(args[0], args) == -1) {
       perror("esh");
     }
-    exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE);  // this only terminates the child process
   } else if (pid < 0) {
     perror("esh");
   } else {
