@@ -221,8 +221,15 @@ void EshLoop(void) {
   ### if the SIGINT arrives, program will exit.
   */
 
-  signal(SIGINT, SigintHandler);
+  // signal(SIGINT, SigintHandler);
   // signal(SIGINT, SIG_IGN);  // ignore Ctrl-C
+
+  // Use sigaction() to realize signal handling
+  struct sigaction SigAction;
+  SigAction.sa_handler = SigintHandler;
+  sigemptyset(&SigAction.sa_mask);
+  SigAction.sa_flags = SA_RESTART;
+  sigaction(SIGINT, &SigAction, NULL);
 
   do {
     // sleep(10);
