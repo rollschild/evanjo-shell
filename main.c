@@ -1,3 +1,4 @@
+#include <setjmp.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -12,13 +13,20 @@
 #define ESH_TOKEN_DELIM " \t\n\r\a"
 
 typedef void (*sig_handler_ptr)(int);
+// static jmp_buf env;
+static sigjmp_buf env;
+static volatile sig_atomic_t jump_active = 0;
 
 sig_handler_ptr signal(int sig_num, sig_handler_ptr handler);
 
 void SigintHandler(int sig_num) {
-  printf("Caught SIGINT!\n");
+  // printf("Caught SIGINT!\n");
   // exit(1);
-  return;
+  // longjmp(env, 42);
+  if (!jump_active) {
+    return;
+  }
+  siglongjmp(env, 42);
 }
 
 int EshCd(char** args);
@@ -206,10 +214,26 @@ void EshLoop(void) {
   char** args;
   int status;
 
-  // signal(SIGINT, SigintHandler);
-  signal(SIGINT, SIG_IGN);  // ignore Ctrl-C
+  // sleep(10);  // TEST
+  /*
+  ### NOTE: if this funcion is enabled,
+  ### before the jump point is set up,
+  ### if the SIGINT arrives, program will exit.
+  */
+
+  signal(SIGINT, SigintHandler);
+  // signal(SIGINT, SIG_IGN);  // ignore Ctrl-C
 
   do {
+    // sleep(10);
+    // right here is the correct place to test sigjmp flag
+
+    if (sigsetjmp(env, 1) == 42) {
+      // right here it blocks the following SITINT invocations
+      printf("SIGINT caught. Restarting...\n");
+      sleep(1);
+    }
+    jump_active = 1;
     printf("esh=$ ");
     line = EshReadLine();
     args = EshParseLine(line);
@@ -217,6 +241,8 @@ void EshLoop(void) {
 
     free(line);
     free(args);
+
+    // sleep(1);
   } while (status);
 
   return;
